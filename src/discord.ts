@@ -48,4 +48,4 @@ export const createMessage = (
       }
     )
     .setURL(`https://opensea.io/assets/${contractAddress}/${tokenId}`)
-    .setImage(metadata.image);
+    .setImage("https://ipfs.io/ipfs/" + metadata.image.slice(7));

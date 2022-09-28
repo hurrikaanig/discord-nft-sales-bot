@@ -34,12 +34,12 @@ type Options = {
 const WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2".toLowerCase();
 
 async function nftSalesBot(options: Options) {
-  log("Setting up discord bot");
+  console.log("Setting up discord bot");
   const channel = await discordSetup(
     options.discordBotToken,
     options.discordChannelId
   );
-  log("Setting up discord bot complete");
+  console.log("Setting up discord bot complete");
 
   const web3 = new Web3(
     new Web3.providers.WebsocketProvider(options.websocketURI, {
@@ -62,13 +62,13 @@ async function nftSalesBot(options: Options) {
   );
 
   async function transferCallback(res: TransferEvent) {
-    log("Transfer event received.");
-    log("Getting transaction");
+    console.log("Transfer event received.");
+    console.log("Getting transaction");
     const tx = await web3.eth.getTransaction(res.transactionHash);
-    log("Getting transaction receipt");
+    console.log("Getting transaction receipt");
     const txReceipt = await web3.eth.getTransactionReceipt(res.transactionHash);
     let wethValue = new BN(0);
-    log(txReceipt.logs);
+    console.log(txReceipt.logs);
     txReceipt?.logs.forEach((currentLog) => {
       // check if WETH was transferred during this transaction
       if (
@@ -84,7 +84,7 @@ async function nftSalesBot(options: Options) {
       }
     });
     let value = new BN(web3.utils.fromWei(tx.value));
-    log(`WETH Value: ${wethValue.toFixed()}, ETH Value: ${value.toFixed()}`);
+    console.log(`WETH Value: ${wethValue.toFixed()}, ETH Value: ${value.toFixed()}`);
     value = value.gt(0) ? value : wethValue;
     if (value.gt(0)) {
       const uri = await contract.methods
@@ -94,6 +94,10 @@ async function nftSalesBot(options: Options) {
         options.metadataCb ?? ((m: any) => m)
       )(uri);
       const block = await web3.eth.getBlock(res.blockNumber);
+      console.log(metadata.name)
+      console.log(value.toFixed())
+      console.log(res.returnValues.to)
+      console.log(res.returnValues.from)
       const message = createMessage(
         metadata,
         value.toFixed(),
@@ -103,7 +107,7 @@ async function nftSalesBot(options: Options) {
         options.contractAddress,
         res.returnValues.tokenId
       );
-      log("Try sending message");
+      console.log("Try sending message");
       try {
         await channel.send({ embeds: [message] });
       } catch (e: any) {
